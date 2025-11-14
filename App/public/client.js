@@ -15,12 +15,16 @@ document.body.appendChild(renderer.domElement)
 const controls = new OrbitControls(camera, renderer.domElement)
 
 //Earth Object ---------------------------------------------------------------------
-const earthGeometry = new THREE.SphereGeometry()
-const earthMaterial = new THREE.MeshBasicMaterial({
-    color: 0x0070f0,
-    wireframe: true,
+const textureLoader = new THREE.TextureLoader();
+const earthTexture = textureLoader.load('textures/00_earthmap1k.jpg');
+
+const earthGeometry = new THREE.SphereGeometry(1, 64, 64)
+const earthMaterial = new THREE.MeshPhongMaterial({
+    map: earthTexture
 })
+
 const earth = new THREE.Mesh(earthGeometry, earthMaterial)
+earth.rotation.y = Math.PI;
 scene.add(earth)
 
 function makeCircleTexture(size = 64) {
@@ -36,13 +40,16 @@ function makeCircleTexture(size = 64) {
     return new THREE.CanvasTexture(canvas);
 }
 
+// Light Source ---------------------------------------------------------------------
+const light = new THREE.AmbientLight(0xffffff, 1)
+scene.add(light)
 
 //Sat Objects ---------------------------------------------------------------------
  function latLonToVector3(lat, lon, radius = 0.5) {
     const phi = THREE.MathUtils.degToRad(90 - lat);
-    const theta = THREE.MathUtils.degToRad(lon + 180);
+    const theta = THREE.MathUtils.degToRad(lon);
 
-    const x = -radius * Math.sin(phi) * Math.cos(theta);
+    const x =  radius * Math.sin(phi) * Math.cos(theta);
     const z =  radius * Math.sin(phi) * Math.sin(theta);
     const y =  radius * Math.cos(phi);
 
