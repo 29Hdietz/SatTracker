@@ -36,22 +36,38 @@ function makeCircleTexture(size = 64) {
     return new THREE.CanvasTexture(canvas);
 }
 
-const satTexture = makeCircleTexture();
-const satMaterial = new THREE.PointsMaterial({
-    color: 0xff0000,
-    size: 0.05,
-    map: satTexture,
-    alphaTest: 0.5,
-    transparent: true
-});
+
 //Sat Objects ---------------------------------------------------------------------
+ function latLonToVector3(lat, lon, radius = 0.5) {
+    const phi = THREE.MathUtils.degToRad(90 - lat);
+    const theta = THREE.MathUtils.degToRad(lon + 180);
+
+    const x = -radius * Math.sin(phi) * Math.cos(theta);
+    const z =  radius * Math.sin(phi) * Math.sin(theta);
+    const y =  radius * Math.cos(phi);
+
+    return new THREE.Vector3(x, y, z);
+}
+
 // Just call this to make a new satellite
-function addSatellite(x, y, z) {
+function addSatellite(x, y, z,color) {
     const geometry = new THREE.BufferGeometry();
+    const altitude = 0.1; // small distance above the sphere
+    const cordanates = latLonToVector3(x, y, z, 1);
     geometry.setAttribute(
         'position',
-        new THREE.Float32BufferAttribute([x, y, z], 3)
+        new THREE.Float32BufferAttribute([cordanates.x, cordanates.y, cordanates.z], 3)
     );
+
+    const satTexture = makeCircleTexture();
+    const satMaterial = new THREE.PointsMaterial({
+        color: color,
+        size: 0.03,
+        map: satTexture,
+        alphaTest: 0.5,
+        transparent: true
+    });
+
 
     const sat = new THREE.Points(geometry, satMaterial);
     earth.add(sat);
@@ -59,12 +75,16 @@ function addSatellite(x, y, z) {
 }
 
 // Add as many as you want
-for (let i = 0; i < 3; i++) { 
-        addSatellite(2, 0, i); // can switch out these xyz cords to the longitured, lattitude and altitude gotten from the api 
-}
-addSatellite(1.5, 1, .5);
-addSatellite(-1.5, 1, 0.5);
-addSatellite(0, -2, 1);
+  for (let i = 0; i < 360; i++) { 
+          addSatellite(0, i , 1); // equator test in white
+  }
+
+//N W cordinates stay the same S E cordinates are negative
+addSatellite(45.6793, 111.0373, 1, 0x39FF14); //Bozeman in green
+addSatellite(39.7392, 104.9903, 1, 0x39FF14); //Denver in green
+addSatellite(51.5072, 0.1276, 1, 0xFFFF00); //london in yellow
+addSatellite(-33.8727, -151.2057, 1, 0xFFA500); //sydney in orange
+
 
 //utilites Objects ---------------------------------------------------------------------
 window.addEventListener(
