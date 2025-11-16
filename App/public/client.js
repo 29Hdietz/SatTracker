@@ -127,3 +127,17 @@ function render() {
 }
 
 animate()
+
+
+// fetch satellite data
+async function fetchSatelliteData() { 
+    try{
+        const response =  await fetch('http://localhost:3000/satillites');
+        const data = await response.json();
+        console.log(data);
+    } catch (err) {
+        console.error('Error retrieving satellite data');
+    }
+}
+
+fetchSatelliteData();
