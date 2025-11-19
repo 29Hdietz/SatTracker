@@ -45,9 +45,9 @@ const light = new THREE.AmbientLight(0xffffff, 1)
 scene.add(light)
 
 //Sat Objects ---------------------------------------------------------------------
- function latLonToVector3(lat, lon, radius = 0.5) {
+ function latLonToVector3(lat, lon, radius = 1) {
     const phi = THREE.MathUtils.degToRad(90 - lat);
-    const theta = THREE.MathUtils.degToRad(lon);
+    const theta = THREE.MathUtils.degToRad(lon) * (-1);
 
     const x =  radius * Math.sin(phi) * Math.cos(theta);
     const z =  radius * Math.sin(phi) * Math.sin(theta);
@@ -57,10 +57,10 @@ scene.add(light)
 }
 
 // Just call this to make a new satellite
-function addSatellite(x, y, z,color) {
+function addSatellite(lat, lon, radius, color) {
     const geometry = new THREE.BufferGeometry();
     const altitude = 0.1; // small distance above the sphere
-    const cordanates = latLonToVector3(x, y, z, 1);
+    const cordanates = latLonToVector3(lat, lon, radius + altitude);
     geometry.setAttribute(
         'position',
         new THREE.Float32BufferAttribute([cordanates.x, cordanates.y, cordanates.z], 3)
@@ -86,11 +86,11 @@ function addSatellite(x, y, z,color) {
           addSatellite(0, i , 1); // equator test in white
   }
 
-//N W cordinates stay the same S E cordinates are negative
-addSatellite(45.6793, 111.0373, 1, 0x39FF14); //Bozeman in green
-addSatellite(39.7392, 104.9903, 1, 0x39FF14); //Denver in green
-addSatellite(51.5072, 0.1276, 1, 0xFFFF00); //london in yellow
-addSatellite(-33.8727, -151.2057, 1, 0xFFA500); //sydney in orange
+//N E cordinates positive S W cordinates are negative
+addSatellite(45.6793, -111.0373, 1, 0x39FF14);    // Bozeman in green
+addSatellite(39.7392, -104.9903, 1, 0x39FF14);    // Denver in green
+addSatellite(51.5072, -0.1276, 1, 0xFFFF00);      // London in yellow
+addSatellite(-33.8727, 151.2057, 1, 0xFFA500);    // Sydney in orange
 
 
 //utilites Objects ---------------------------------------------------------------------
