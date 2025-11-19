@@ -11,7 +11,7 @@ app.listen(3000, () => console.log('Visit http://127.0.0.1:3000'))
 
 
 // Todo - allow user to specify satellite id, satillites.json contains norad ids for popular satellites)
-app.get('/satillites', async (req, res) => {
+app.get('/satellites', async (req, res) => {
    
     try {
         // Test values for ISS from Bozeman, MT

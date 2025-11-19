@@ -128,13 +128,12 @@ function render() {
 
 animate()
 
-
 // fetch satellite data
 async function fetchSatelliteData() { 
     try{
-        const response =  await fetch('http://localhost:3000/satillites');
+        const response =  await fetch('http://localhost:3000/satellites');
         const data = await response.json();
-        console.log(data);
+        addSatellite(data.positions[0].satlatitude, data.positions[0].satlongitude, 1, 0xFF0000);
     } catch (err) {
         console.error('Error retrieving satellite data');
     }
