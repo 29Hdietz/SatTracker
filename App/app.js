@@ -25,7 +25,7 @@ app.get('/', (req, res) => {
 app.post('/satellites', async (req, res) => {
 
     try {
-        if (!req.body.satellites && req.body.satellites.length === 0) {
+        if (!req.body.satellites || req.body.satellites.length === 0) {
             return res.status(400).send('No satellites provided')
         }
 
