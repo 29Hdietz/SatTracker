@@ -1,14 +1,27 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+const satData = require('./satellites.json')
 require('dotenv').config()
 
+app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'))
 app.use('/build/', express.static(path.join(__dirname, 'node_modules/three/build')))
 app.use('/jsm/', express.static(path.join(__dirname, 'node_modules/three/examples/jsm')))
 
 app.listen(3000, () => console.log('Visit http://127.0.0.1:3000'))
 
+// Send main page with satellite data
+app.get('/', (req, res) => {
+    try {
+        // return smaller dataset for now
+        const smallData = satData.slice(0,100)
+        console.log(smallData.length)
+        res.render('index', { satData: smallData })
+    } catch (err) {
+        res.status(500).send('Server Error')
+    }
+})
 
 // Todo - allow user to specify satellite id, satillites.json contains norad ids for popular satellites)
 app.get('/satellites', async (req, res) => {
@@ -23,7 +36,7 @@ app.get('/satellites', async (req, res) => {
 
         const response = await fetch(`https://api.n2yo.com/rest/v1/satellite/positions/${id}/${observer_lat}/${observer_lng}/${observer_alt}/${seconds}&apiKey=${process.env.API_KEY}`)
         const data = await response.json()
-        res.json(data);
+        res.json(data)
 
     } catch (err) {
         res.status(500).send('Error retrieving satellite data')

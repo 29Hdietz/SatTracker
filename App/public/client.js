@@ -113,6 +113,9 @@ const cameraFolder = gui.addFolder('Camera')
 cameraFolder.add(camera.position, 'z', 0, 10)
 cameraFolder.open()
 
+stats.dom.style.left = 'auto';
+stats.dom.style.right = (gui.domElement.offsetWidth + 15) + 'px';
+
 function animate() {
     requestAnimationFrame(animate)
     earth.rotation.x += 0.00
@@ -140,3 +143,18 @@ async function fetchSatelliteData() {
 }
 
 fetchSatelliteData();
+
+const toggleBtn = document.getElementById('sat-toggle-btn')
+const closeBtn = document.getElementById('sat-close-btn')
+const drawer = document.getElementById('satellite-panel')
+
+toggleBtn.addEventListener('click', () => {
+    drawer.classList.toggle('open')
+    toggleBtn.style.display = 'none'
+
+})
+
+closeBtn.addEventListener('click', () => {
+    drawer.classList.remove('open')
+    toggleBtn.style.display = 'block'
+})
