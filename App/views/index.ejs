@@ -22,17 +22,9 @@
 </head>
 
 <body>
-
-  <script type="module" src="client.js"></script>
-
-  <!-- Table for user to select satillites they want to view:
-   - Form needs finished
-   - Allow user to select multiple satellites via checkbox (up to 10)
-   - On submit, send list of selected norad ids to server to fetch data for those satellites
-   - Add search/filter functionality to find specific satellites ?
-  -->
-
+  <!-- Table for user to select satillites they want to view -->
   <button id="sat-toggle-btn" title="Toggle Satellites">&#9776;</button>
+  
   <form id="satellite-panel">
 
     <div id="table-container">
@@ -68,14 +60,12 @@
       </div>
 
       <div class="panel-footer">
-        <button id="launch-btn" title="Launch selected satellites">Launch</button>
+        <button type="submit" id="launch-btn">Launch</button>
       </div>
       
     </div>
   </form>
 
-
-  <script type="module" src="/client.js"></script>
+  <script type="module" src="/client.js" defer></script>
 </body>
-
 </html>

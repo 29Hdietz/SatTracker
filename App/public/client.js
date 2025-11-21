@@ -3,6 +3,7 @@ import { OrbitControls } from './jsm/controls/OrbitControls.js'
 import Stats from './jsm/libs/stats.module.js'
 import { GUI } from './jsm/libs/lil-gui.module.min.js'
 
+let ACTIVE_SATELLITES = []
 const scene = new THREE.Scene()
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
@@ -57,7 +58,7 @@ scene.add(light)
 }
 
 // Just call this to make a new satellite
-function addSatellite(lat, lon, radius, color) {
+function addSatellite(lat, lon, radius, color = 0xFFFFFF) {
     const geometry = new THREE.BufferGeometry();
     const altitude = 0.1; // small distance above the sphere
     const cordanates = latLonToVector3(lat, lon, radius + altitude);
@@ -74,11 +75,18 @@ function addSatellite(lat, lon, radius, color) {
         alphaTest: 0.5,
         transparent: true
     });
-
-
+    
     const sat = new THREE.Points(geometry, satMaterial);
+    ACTIVE_SATELLITES.push(sat);
     earth.add(sat);
     return sat;
+}
+
+function removeAllSatellites() {
+    for (const sat of ACTIVE_SATELLITES) {
+        earth.remove(sat)
+    }
+    ACTIVE_SATELLITES = []
 }
 
 // Add as many as you want
@@ -132,18 +140,53 @@ function render() {
 animate()
 
 // fetch satellite data
-async function fetchSatelliteData() { 
+async function fetchSatelliteData(satellites) { 
     try{
-        const response =  await fetch('http://localhost:3000/satellites');
+        if (satellites.length === 0) return
+        removeAllSatellites();
+
+        const response = await fetch('http://localhost:3000/satellites', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({  satellites: satellites })
+        });
         const data = await response.json();
-        addSatellite(data.positions[0].satlatitude, data.positions[0].satlongitude, 1, 0xFF0000);
+        // add all satellites
+        for (const d of data) {
+            let currentSat = addSatellite(d.data.positions[0].satlatitude, d.data.positions[0].satlongitude, 1, d.color );
+        }
     } catch (err) {
-        console.error('Error retrieving satellite data');
+        console.error(err);
     }
 }
 
-fetchSatelliteData();
+// Handle form submission
+const form = document.getElementById('satellite-panel');
 
+form.addEventListener('submit', (e) => {
+    e.preventDefault()
+
+    const rows = form.querySelectorAll('tbody tr')
+    const selectedSatellites = []
+
+    rows.forEach(row => {
+        const checkbox = row.querySelector('input[type="checkbox"]')
+        if (checkbox.checked) {
+            const colorInput = row.querySelector('input[type="color"]')
+            selectedSatellites.push({
+                id: checkbox.value,
+                color: colorInput.value
+            })
+        }
+    })
+    if (selectedSatellites.length === 0) return
+    fetchSatelliteData(selectedSatellites);
+});
+
+
+// Table UI
 const toggleBtn = document.getElementById('sat-toggle-btn')
 const closeBtn = document.getElementById('sat-close-btn')
 const drawer = document.getElementById('satellite-panel')
