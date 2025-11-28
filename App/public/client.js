@@ -7,7 +7,7 @@ let ACTIVE_SATELLITES = []
 const scene = new THREE.Scene()
 
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 100)
-camera.position.z = 5 // changes camera distance
+camera.position.z = 2.5 // changes camera starting distance
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
@@ -58,9 +58,9 @@ scene.add(light)
 }
 
 // Just call this to make a new satellite
-function addSatellite(lat, lon, radius, color = 0xFFFFFF) {
+function addSatellite(lat, lon, radius, elavation, color = 0xFFFFFF) {
     const geometry = new THREE.BufferGeometry();
-    const altitude = 0.1; // small distance above the sphere
+    const altitude = elavation; // small distance above the sphere
     const cordanates = latLonToVector3(lat, lon, radius + altitude);
     geometry.setAttribute(
         'position',
@@ -89,16 +89,11 @@ function removeAllSatellites() {
     ACTIVE_SATELLITES = []
 }
 
-// Add as many as you want
-  for (let i = 0; i < 360; i++) { 
-          addSatellite(0, i , 1); // equator test in white
-  }
-
 //N E cordinates positive S W cordinates are negative
-addSatellite(45.6793, -111.0373, 1, 0x39FF14);    // Bozeman in green
-addSatellite(39.7392, -104.9903, 1, 0x39FF14);    // Denver in green
-addSatellite(51.5072, -0.1276, 1, 0xFFFF00);      // London in yellow
-addSatellite(-33.8727, 151.2057, 1, 0xFFA500);    // Sydney in orange
+addSatellite(45.6793, -111.0373, 1, 0, 0xFF0000);    // Bozeman 
+addSatellite(39.7392, -104.9903, 1, 0, 0xFF0000);    // Denver 
+addSatellite(51.5072, -0.1276, 1, 0, 0xFF0000);      // London
+addSatellite(-33.8727, 151.2057, 1, 0, 0xFF0000);    // Sydney 
 
 
 //utilites Objects ---------------------------------------------------------------------
@@ -145,7 +140,7 @@ async function fetchSatelliteData(satellites) {
         if (satellites.length === 0) return
         removeAllSatellites();
 
-        const response = await fetch('http://localhost:3000/satellites', {
+        const response = await fetch('http://127.0.0.1:3000/satellites', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -155,8 +150,12 @@ async function fetchSatelliteData(satellites) {
         const data = await response.json();
         // add all satellites
         for (const d of data) {
-            let currentSat = addSatellite(d.data.positions[0].satlatitude, d.data.positions[0].satlongitude, 1, d.color );
+            let currentSat = addSatellite(d.data.positions[0].satlatitude, d.data.positions[0].satlongitude, 1, d.data.positions[0].elevation, d.color );
         }
+        addSatellite(45.6793, -111.0373, 1, 0, 0xFF0000);    // Bozeman 
+        addSatellite(39.7392, -104.9903, 1, 0, 0xFF0000);    // Denver 
+        addSatellite(51.5072, -0.1276, 1, 0, 0xFF0000);      // London
+        addSatellite(-33.8727, 151.2057, 1, 0, 0xFF0000);    // Sydney 
     } catch (err) {
         console.error(err);
     }
