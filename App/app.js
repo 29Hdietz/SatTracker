@@ -23,25 +23,29 @@ app.get('/', (req, res) => {
 
 // Endpoint to fetch satellite data
 app.post('/satellites', async (req, res) => {
-
     try {
-        if (!req.body.satellites || req.body.satellites.length === 0) {
-            return res.status(400).send('No satellites provided')
+        const sats = req.body.satellites;
+        if (!sats || sats.length === 0) {
+            return res.status(400).send('No satellites provided');
         }
 
-        results = []
-        for (const sat of req.body.satellites) {
-            const id = parseInt(sat.id)
-            const response = await fetch(`https://api.n2yo.com/rest/v1/satellite/positions/${id}/45.6793/111.0373/0/2&apiKey=${process.env.API_KEY}`)
-            const data = await response.json()
-            results.push({
-                data: data,
-                color: sat.color
-            })
-        }
-        res.json(results)
+        const fetches = sats.map(sat => {
+            const id = parseInt(sat.id);
+
+            return fetch(`https://api.n2yo.com/rest/v1/satellite/positions/${id}/45.6793/111.0373/0/2?apiKey=${process.env.API_KEY}`)
+                .then(response => response.json())
+                .then(data => ({
+                    data: data,
+                    color: sat.color
+                }));
+        });
+
+        const results = await Promise.all(fetches);
+
+        res.json(results);
 
     } catch (err) {
-        res.status(500).send('Error retrieving satellite data')
+        console.error(err);
+        res.status(500).send('Error retrieving satellite data');
     }
-})
+});

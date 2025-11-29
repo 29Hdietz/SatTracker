@@ -58,6 +58,8 @@ scene.add(light)
 }
 
 // Just call this to make a new satellite
+const sharedSatTexture = makeCircleTexture();
+
 function addSatellite(lat, lon, radius, elavation, color = 0xFFFFFF) {
     const geometry = new THREE.BufferGeometry();
     const altitude = elavation; // small distance above the sphere
@@ -67,11 +69,10 @@ function addSatellite(lat, lon, radius, elavation, color = 0xFFFFFF) {
         new THREE.Float32BufferAttribute([cordanates.x, cordanates.y, cordanates.z], 3)
     );
 
-    const satTexture = makeCircleTexture();
     const satMaterial = new THREE.PointsMaterial({
         color: color,
         size: 0.03,
-        map: satTexture,
+        map: sharedSatTexture,
         alphaTest: 0.5,
         transparent: true
     });
@@ -152,13 +153,14 @@ async function fetchSatelliteData(satellites) {
         for (const d of data) {
             let currentSat = addSatellite(d.data.positions[0].satlatitude, d.data.positions[0].satlongitude, 1, d.data.positions[0].elevation, d.color );
         }
-        addSatellite(45.6793, -111.0373, 1, 0, 0xFF0000);    // Bozeman 
-        addSatellite(39.7392, -104.9903, 1, 0, 0xFF0000);    // Denver 
-        addSatellite(51.5072, -0.1276, 1, 0, 0xFF0000);      // London
-        addSatellite(-33.8727, 151.2057, 1, 0, 0xFF0000);    // Sydney 
+       
     } catch (err) {
         console.error(err);
     }
+     addSatellite(45.6793, -111.0373, 1, 0, 0xFF0000);    // Bozeman 
+     addSatellite(39.7392, -104.9903, 1, 0, 0xFF0000);    // Denver 
+     addSatellite(51.5072, -0.1276, 1, 0, 0xFF0000);      // London
+     addSatellite(-33.8727, 151.2057, 1, 0, 0xFF0000);    // Sydney 
 }
 
 // Handle form submission
