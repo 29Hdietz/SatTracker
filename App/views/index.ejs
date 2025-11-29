@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Satellite Tracker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Satellite Tracker" />
+  <link rel="stylesheet" href="/styles/index.css" />
+
+  <!-- Import maps polyfill -->
+  <!-- Remove this when import maps will be widely supported -->
+  <script async src="https://unpkg.com/es-module-shims@1.6.2/dist/es-module-shims.js"></script>
+
+  <script type="importmap">
+	            {
+	              "imports": {
+	                  "three": "./build/three.module.js"
+	              }
+	            }
+		</script>
+</head>
+
+<body>
+  <!-- Table for user to select satillites they want to view -->
+  <button id="sat-toggle-btn" title="Toggle Satellites">&#9776;</button>
+  
+  <form id="satellite-panel">
+
+    <div id="table-container">
+
+      <div class="panel-header">
+        <div class="title">Add Satellites</div>
+        <button type="button" id="sat-close-btn">&times;</button>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Satellite</th>
+              <th style="text-align:right;">visibility · color</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% satData.forEach(sat=> { %>
+              <tr>
+                <td><input type="checkbox" value="<%= sat.id %>" class="sat-toggle"></td>
+                <td>
+                  <div class="sat-name">
+                    <%= sat.name %>
+                  </div>
+                </td>
+                <td style="text-align:right;"><input type="color" class="sat-color" value="#00FF04"></td>
+              </tr>
+              <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="panel-footer">
+        <button type="submit" id="launch-btn">Launch</button>
+      </div>
+      
+    </div>
+  </form>
+
+  <script type="module" src="/client.js" defer></script>
+</body>
+</html>
