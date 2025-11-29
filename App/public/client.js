@@ -80,7 +80,11 @@ function addSatellite(x, y, z,color) {
   }
 
 //N W cordinates stay the same S E cordinates are negative
-addSatellite(45.6793, 111.0373, 1, 0x39FF14); //Bozeman in green
+for (let i = 40; i < 100; i++) { 
+          addSatellite(45.6793, 111.0373, i/40, 0x39FF14); //Bozeman in green
+  }
+
+
 addSatellite(39.7392, 104.9903, 1, 0x39FF14); //Denver in green
 addSatellite(51.5072, 0.1276, 1, 0xFFFF00); //london in yellow
 addSatellite(-33.8727, -151.2057, 1, 0xFFA500); //sydney in orange
