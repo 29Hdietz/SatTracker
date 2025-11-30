@@ -1,5 +1,7 @@
 //-------------------------------3D Satellite Tracker-------------------------------//
 
+Created By Hunter Dietzenbach and Devon Maurer
+
 A real-time 3D satellite visualization and tracking app built with Three.js, displaying satellites orbiting Earth with animated trails and city markers.
 
 //-------------------------------Features-------------------------------//
