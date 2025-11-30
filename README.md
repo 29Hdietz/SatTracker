@@ -2,8 +2,7 @@
 
 A real-time 3D satellite visualization and tracking app built with Three.js, displaying satellites orbiting Earth with animated trails and city markers.
 
-Features
-
+//-------------------------------Features-------------------------------//
 3D Earth: Interactive globe with texture mapping and rotation.
 
 Satellite Visualization: Add multiple satellites with RA/Dec positioning.
