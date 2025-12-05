@@ -3,6 +3,12 @@ import { OrbitControls } from './jsm/controls/OrbitControls.js'
 import Stats from './jsm/libs/stats.module.js'
 import { GUI } from './jsm/libs/lil-gui.module.min.js'
 
+const SCENE_EARTH_RADIUS = 1
+const EARTH_RADIUS_KM = 6371
+
+// Visual only (higher values move satillites farther away from earth)
+const ALTITUDE_SCALE = 0.5
+
 let ACTIVE_SATELLITES = []
 let ORBIT_TRAILS = []
 const scene = new THREE.Scene()
@@ -16,7 +22,7 @@ document.body.appendChild(renderer.domElement)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 
-// Earth ---------------------------------------------------------------------
+// --- Earth ---
 const textureLoader = new THREE.TextureLoader();
 const earthTexture = textureLoader.load('textures/00_earthmap1k.jpg');
 
@@ -38,32 +44,34 @@ function makeCircleTexture(size = 32, color = '#ffffff') {
     return new THREE.CanvasTexture(canvas);
 }
 
-// Light ---------------------------------------------------------------------
+// --- Light ---
 const light = new THREE.AmbientLight(0xffffff, 1)
 scene.add(light)
 
 
-// --- Satellites -----------------------------------------------------------------
+// --- Satellites ---
 const sharedSatTexture = makeCircleTexture(32, '#ffffff');
 
-function addSatellite(raDeg, decDeg, radius, elevation, color = 0xffffff, trailLength = 250) {
+function addSatellite(raDeg, decDeg, elevation, color = 0xffffff, trailLength = 250) {
     // Satellite mesh
     const satMeshGeometry = new THREE.BufferGeometry();
     satMeshGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0, 0, 0], 3));
 
     const satMaterial = new THREE.PointsMaterial({
         color,
-        size: 0.4,
+        size: 0.05,
         map: sharedSatTexture,
         alphaTest: 0.5,
         transparent: true
     });
 
+    const altitude = SCENE_EARTH_RADIUS + (elevation / EARTH_RADIUS_KM);
+
     const sat = new THREE.Points(satMeshGeometry, satMaterial);
     scene.add(sat);
 
     // Orbit points (precomputed)
-    const orbitPoints = generateOrbitPointsRA(raDeg, decDeg, elevation);
+    const orbitPoints = generateOrbitPointsRA(raDeg, decDeg, altitude);
 
     // Trail setup
     const trailPositions = new Float32Array(trailLength * 3); // x,y,z per point
@@ -102,10 +110,10 @@ function removeAllSatellites() {
 // --- Generate orbit points for satellites using RA/Dec ---
 function generateOrbitPointsRA(raDeg, decDeg, elevation, numPoints = 500) {
     const points = [];
-    const earthRadius = 1;
-    const orbitRadius = earthRadius + elevation
+    const orbitRadius = ALTITUDE_SCALE + elevation;
 
     const decRad = THREE.MathUtils.degToRad(decDeg);
+    const raRad = THREE.MathUtils.degToRad(raDeg); 
 
     for (let i = 0; i < numPoints; i++) {
         const angle = (i / numPoints) * Math.PI * 2; // orbit angle
@@ -113,14 +121,19 @@ function generateOrbitPointsRA(raDeg, decDeg, elevation, numPoints = 500) {
         let y = 0;
         let z = orbitRadius * Math.sin(angle);
 
-        // rotate the orbit by declination around X axis (tilt)
+        // rotate by declination (tilt)
         const cosD = Math.cos(decRad);
         const sinD = Math.sin(decRad);
+        let yRot = y * cosD - z * sinD;
+        let zRot = y * sinD + z * cosD;
 
-        const yRot = y * cosD - z * sinD;
-        const zRot = y * sinD + z * cosD;
+        // rotate orbit by RA (around Y axis)
+        const cosRA = Math.cos(raRad);
+        const sinRA = Math.sin(raRad);
+        const xRot = x * cosRA - zRot * sinRA;
+        const zFinal = x * sinRA + zRot * cosRA;
 
-        points.push(new THREE.Vector3(x, yRot, zRot));
+        points.push(new THREE.Vector3(xRot, yRot, zFinal));
     }
 
     return points;
@@ -183,7 +196,7 @@ let lastStatsUpdate = 0;
 
 function animate(time) {
     requestAnimationFrame(animate);
-    earth.rotation.y += 0.001;
+    // earth.rotation.y += 0.001;  
 
     for (const sat of ACTIVE_SATELLITES) {
         sat.currentIndex = (sat.currentIndex + 1) % sat.orbitPoints.length;
@@ -212,7 +225,7 @@ function render() {
 
 animate()
 
-// fetch satellite data
+// --- Fetch satellite data ---
 async function fetchSatelliteData(satellites) { 
     try{
         if (satellites.length === 0) return
@@ -228,7 +241,7 @@ async function fetchSatelliteData(satellites) {
         const data = await response.json();
         // add all satellites
         for (const d of data) {
-            let currentSat = addSatellite(d.data.positions[0].satlatitude, d.data.positions[0].satlongitude, 1, d.data.positions[0].elevation, d.color );
+            let currentSat = addSatellite(d.data.positions[0].ra, d.data.positions[0].dec, d.data.positions[0].elevation, d.color );
         }
        
     } catch (err) {
@@ -237,7 +250,7 @@ async function fetchSatelliteData(satellites) {
 
 }
 
-// Handle form submission
+// --- Handle form submission ---
 const form = document.getElementById('satellite-panel');
 
 form.addEventListener('submit', (e) => {
@@ -261,7 +274,7 @@ form.addEventListener('submit', (e) => {
 });
 
 
-// Table UI
+// --- Table UI ---
 const toggleBtn = document.getElementById('sat-toggle-btn')
 const closeBtn = document.getElementById('sat-close-btn')
 const drawer = document.getElementById('satellite-panel')

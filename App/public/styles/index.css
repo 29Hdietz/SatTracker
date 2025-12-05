@@ -168,6 +168,8 @@ input[type="color"] {
     max-height: calc(100vh - 120px); 
     overflow-y: auto;
     margin-bottom: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: #555 #1c1c1c;
 }
 
 /* Custom scrollbar */
@@ -185,8 +187,4 @@ input[type="color"] {
 }
 .table-scroll::-webkit-scrollbar-thumb:hover {
     background-color: #888;
-}
-.table-scroll {
-    scrollbar-width: thin;
-    scrollbar-color: #555 #1c1c1c;
 }
